@@ -135,7 +135,41 @@ def loadBudget():
 
 
 def deleteBudget():
-    print("Delete budget function is not implemented yet.")
+    #Grab all budgets
+    budgets = [i for i in os.listdir() if i.endswith(".json")]
+
+    #If no budgets, return
+    if not budgets:
+        print("No budget file found")
+        return None
+
+    #Print all the budget files found
+    print("\nPlease choose a budget to delete:")
+    for i, file in enumerate(budgets):
+        print (f"[{i+1}] {file}")
+
+    #Prompt user for their choice of file
+    while True:
+        try:
+            choice = input("Please enter your choice: ")
+            #Make sure entered # is valid
+            if 1 <= int(choice) <= len(budgets):
+                selection = budgets[int(choice) - 1]
+                break
+            else:
+                raise ValueError
+        #If invalid number is entered, try again
+        except ValueError:
+            print("Invalid choice")
+
+    #Confirm deletion to prevent accidents
+    print("You have chosen to delete: ", selection)
+    delete_confirm = input("Do you want to delete this budget? (y/n): ")
+    if delete_confirm == "y":
+        os.remove(selection)
+        print(f"'{selection}' has been deleted")
+    else:
+        print("Deletion cancelled")
 
 def listBudgets():
     print("List budgets function is not implemented yet.")
@@ -150,6 +184,5 @@ def main():
 if __name__ == "__main__":
     main()
 
-print("Test")
 
 
