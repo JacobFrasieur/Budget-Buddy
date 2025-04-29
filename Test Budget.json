@@ -1,0 +1,16 @@
+{
+    "income": "1900",
+    "limit": "1400",
+    "budget_name": "Test Budget",
+    "expenses": {
+        "rent": 0,
+        "utilities": 0,
+        "car": 0,
+        "groceries": 0,
+        "savings": 0,
+        "health": 0,
+        "entertainment": 0,
+        "debt": 0,
+        "emergency fund": 0
+    }
+}
