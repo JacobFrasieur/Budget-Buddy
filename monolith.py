@@ -14,27 +14,35 @@ def banner():
     print(r"""                              |  $$$$$$/                                                                  |  $$$$$$/      """)
     print(r"""                               \______/                                                                    \______/       """)
     print("\nMake and maintain your budget using Budget Buddy!")
+    print("<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>\n")
+
 def startProgram():
-    print("\nPlease enter a number to pick an option below:\n[1] New Budget\n[2] Load Budget\n[3] Delete Budget")
-    choice = input("Please enter your choice: ")
-    match choice:
-        case "1":
-            newBudget()
-            return
-        case "2":
-            return
-        case "3":
-            deleteBudget()
-            return
-        case _:
+    while True:
+        try:
+            print(
+                "Please enter a number to pick an option below:\n[1] New Budget\n[2] Load Budget\n[3] Delete Budget")
+            choice = input("Please enter your choice: ")
+            print("\n<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>\n")
+            match choice:
+                case "1":
+                    newBudget()
+                    return
+                case "2":
+                    return
+                case "3":
+                    deleteBudget()
+                    return
+                case _:
+                    raise ValueError
+        except ValueError:
             print("Invalid choice")
 
 def newBudget():
     #Get information from user
-    print("\nYou have chosen to create a new budget, please fill out the following information:")
+    print("You have chosen to create a new budget, please fill out the following information:")
     income = input("Current Income:")
     limit = input("Please enter your monthly spending limit: ")
-    print("Please chose a set of starting categories for your purchase: ")
+    print("Please choose a set of starting categories for your purchase: ")
     print("[1 - Minimal] Rent, Utilities, Car, Groceries, Savings")
     print("[2 - Detailed] Rent, Utilities, Car, Groceries, Savings, Health, Entertainment")
     print("[3 - Maximal] Rent, Utilities, Car, Groceries, Savings, Health, Entertainment, Debt, Emergency Fund")
@@ -99,8 +107,7 @@ def newBudget():
         json.dump(current_budget, budget_file, indent=4)
 
     print(f"'{budget_name}' has been saved to '{filename}'")
-
-
+    print("<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>\n")
 
 def loadBudget():
     #Grab all budgets
@@ -112,7 +119,7 @@ def loadBudget():
         return None
 
     #Print all the budget files found
-    print("\nPlease choose a budget to load:")
+    print("Please choose a budget to load:")
     for i, file in enumerate(budgets):
         print (f"[{i+1}] {file}")
 
@@ -131,8 +138,8 @@ def loadBudget():
             print("Invalid choice")
 
     print("You have chosen to load: ", selection)
-
-
+    print("<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>\n")
+    return selection
 
 def deleteBudget():
     #Grab all budgets
@@ -163,7 +170,7 @@ def deleteBudget():
             print("Invalid choice")
 
     #Confirm deletion to prevent accidents
-    print("You have chosen to delete: ", selection)
+    print("You have chosen to delete:",selection)
     delete_confirm = input("Do you want to delete this budget? (y/n): ")
     if delete_confirm == "y":
         os.remove(selection)
@@ -171,14 +178,62 @@ def deleteBudget():
     else:
         print("Deletion cancelled")
 
-def listBudgets():
-    print("List budgets function is not implemented yet.")
+#This is where we will actually do budget manipulation
+def management(current_budget):
+    while True:
+        try:
+            print(current_budget.removesuffix(".json"))
+            print("Spending: ") #Insert spending / limit here
+            print("\nPlease choose an option from the list below (1-5): ")
+            print("[1] View Expenses")
+            print("[2] Add Purchase")
+            print("[3] Create Categories")
+            print("[4] Settings")
+            print("[5] Return to Main Menu") #Find a way to return back to loadbudget
+            choice = input("Please enter your choice: ")
+            match choice:
+                case "1":
+                    purchases()
+                case "2":
+                    add_purchase()
+                case "3":
+                    create_categories()
+                case "4":
+                    settings()
+                case "5":
+                    return
+                case _:
+                    print("Invalid choice")
+                    raise ValueError
+        #Handle invalid choice
+        except ValueError:
+            print("Invalid choice")
+
+def purchases():
+    print("Currently in development")
+
+def add_purchase():
+    print("currently in development")
+
+def create_categories():
+    print("currently in development")
+
+def settings():
+    print("currently in development")
 
 #Main - Self explanatory
 def main():
-    banner()
-    startProgram()
-    loadBudget()
+    while True:
+        try:
+            banner()
+            #Create/Load/Delete
+            startProgram()
+            #Load current budget for use in management
+            current_budget = loadBudget()
+            #Bulk of budget manipulation done here
+            management(current_budget)
+        except:
+            print("Something went wrong, please report this to the developer")
 
 #Automatically run main
 if __name__ == "__main__":
