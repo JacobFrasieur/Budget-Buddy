@@ -23,12 +23,17 @@ def startProgram():
                 "Please enter a number to pick an option below:\n[1] New Budget\n[2] Load Budget\n[3] Delete Budget")
             choice = input("Please enter your choice: ")
             print("\n<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>\n")
+            #We keep load separate from the startProgram - we load it after creation anyways
             match choice:
                 case "1":
                     newBudget()
                     return
                 case "2":
-                    return
+                    budgets_folder = "Budgets"
+                    if os.path.exists(budgets_folder):
+                        return
+                    else:
+                        raise FileNotFoundError
                 case "3":
                     deleteBudget()
                     return
@@ -36,6 +41,8 @@ def startProgram():
                     raise ValueError
         except ValueError:
             print("Invalid choice")
+        except FileNotFoundError:
+            print("You don't have any budget to load, please create one first!\n")
 
 def newBudget():
     #Get information from user
@@ -100,9 +107,12 @@ def newBudget():
         "expenses": expenses
     }
 
-    #Store as a file
-    filename = f"{budget_name}.json"
+    #Create folder for budgets if one doesnt already exist, then store new budget in it
+    budgets_folder = "Budgets"
+    os.makedirs(budgets_folder, exist_ok=True)
+    filename = os.path.join(budgets_folder, f"{budget_name}.json")
 
+    #Open and write to file
     with open(filename, "w") as budget_file:
         json.dump(current_budget, budget_file, indent=4)
 
@@ -111,7 +121,8 @@ def newBudget():
 
 def loadBudget():
     #Grab all budgets
-    budgets = [i for i in os.listdir() if i.endswith(".json")]
+    budgets_folder = "Budgets"
+    budgets = [i for i in os.listdir(budgets_folder) if i.endswith(".json")]
 
     #If no budgets, return
     if not budgets:
@@ -143,7 +154,8 @@ def loadBudget():
 
 def deleteBudget():
     #Grab all budgets
-    budgets = [i for i in os.listdir() if i.endswith(".json")]
+    budgets_folder = "Budgets"
+    budgets = [i for i in os.listdir(budgets_folder) if i.endswith(".json")]
 
     #If no budgets, return
     if not budgets:
@@ -233,7 +245,7 @@ def main():
             #Bulk of budget manipulation done here
             management(current_budget)
         except:
-            print("Something went wrong, please report this to the developer")
+            print("Something went wrong, please report this to the developer\n")
 
 #Automatically run main
 if __name__ == "__main__":
