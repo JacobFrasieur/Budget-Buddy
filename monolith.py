@@ -198,12 +198,19 @@ def deleteBudget():
     else:
         print("Deletion cancelled")
 
-#This is where we will actually do budget manipulation
 def management(current_budget, budget_name):
     while True:
         try:
             print(budget_name.removesuffix(".json"))
-            print("Spending: ") #Insert spending / limit here
+
+            #Spending total
+            categories = current_budget["expenses"]
+            total_spending = 0
+            for category, purchases in current_budget["expenses"].items():
+                for item, cost in purchases.items():
+                    total_spending += cost
+            print("$",total_spending, "/", "$",current_budget["limit"])
+
             print("\nPlease choose an option from the list below (1-5): ")
             print("[1] View Expenses")
             print("[2] Add Purchase")
@@ -213,11 +220,13 @@ def management(current_budget, budget_name):
             choice = input("Please enter your choice: ")
             match choice:
                 case "1":
-                    expenses()
+                    print("\n<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>")
+                    expenses(current_budget)
+                    print("<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>\n")
                 case "2":
                     purchase_menu(current_budget)
                 case "3":
-                    create_categories()
+                    create_categories(current_budget)
                 case "4":
                     settings()
                 case "5":
@@ -229,9 +238,16 @@ def management(current_budget, budget_name):
         except ValueError:
             print("Invalid choice")
 
-def expenses():
-    print("Currently in development")
-    #The idea here is we will print
+def expenses(current_budget):
+    print("Current Purchases:\n")
+    # Index the categories, print them with their index
+    categories = current_budget["expenses"]
+    total_spending = 0
+    for i, (category, purchases) in enumerate(categories.items()):
+        for item, cost in purchases.items():
+            print(f"{category.capitalize()}: ${cost} - {item}")
+            total_spending += cost
+    print("Total Spent: $",total_spending)
 
 def purchase_menu(current_budget):
     print("What category should your purchase be added to?:")
@@ -260,14 +276,11 @@ def purchase_menu(current_budget):
         if cat_choice == i:
             add_purchase(current_budget, category, purchase, cost)
 
-
-
-
 def add_purchase(current_budget, category, purchase, cost):
     # Create new dic with purchase in it. Create the filename, open the file at that name, write the new dict in
 
     #Create the new dictionary entry for the item
-    print("Adding", purchase, "to", category, "with the price", cost)
+    print("Adding", purchase, "to", category, "with the price", cost, "\n")
     current_budget["expenses"][category][purchase] = cost
 
     #Create filename w/ the dir, filename and json file extension
@@ -277,10 +290,17 @@ def add_purchase(current_budget, category, purchase, cost):
     with open(filename, "w") as budget_file:
         json.dump(current_budget, budget_file, indent=4)
 
-
-
-def create_categories():
-    print("currently in development")
+def create_categories(current_budget):
+    #Was very easy to implement, just copied from add_purchase(). Ask for name, write to dict, open json, write to it.
+    #Ask for cat name, put it in the dict (made it lower just in case)
+    cat_name = input("What should the new category be: ").lower()
+    current_budget["expenses"][cat_name] = {}
+    #Create filename w/ the dir, filename and json file extension
+    budgets_folder = "Budgets"
+    filename = os.path.join(budgets_folder, current_budget["budget_name"] + ".json")
+    #Open file with filename
+    with open(filename, "w") as budget_file:
+        json.dump(current_budget, budget_file, indent=4)
 
 def settings():
     print("currently in development")
