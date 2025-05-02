@@ -21,7 +21,7 @@ def startProgram():
         try:
             print(
                 "Please enter a number to pick an option below:\n[1] New Budget\n[2] Load Budget\n[3] Delete Budget")
-            choice = input("Please enter your choice: ")
+            choice = input("Please enter your choice (1-3): ")
             print("\n<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>\n")
             #We keep load separate from the startProgram - we load it after creation anyways
             match choice:
@@ -36,6 +36,7 @@ def startProgram():
                         raise FileNotFoundError
                 case "3":
                     deleteBudget()
+                    #ADD HANDLING - If no budgets remain, newBudget() must be ran to avoid loading no budgets message
                     return
                 case _:
                     raise ValueError
@@ -50,38 +51,41 @@ def newBudget():
     income = input("Current Income:")
     limit = input("Please enter your monthly spending limit: ")
     print("Please choose a set of starting categories for your purchase: ")
-    print("[1 - Minimal] Rent, Utilities, Car, Groceries, Savings")
-    print("[2 - Detailed] Rent, Utilities, Car, Groceries, Savings, Health, Entertainment")
-    print("[3 - Maximal] Rent, Utilities, Car, Groceries, Savings, Health, Entertainment, Debt, Emergency Fund")
+    print("[1 - Minimal] Rent, Utilities, Car, Groceries, Savings, Misc.")
+    print("[2 - Detailed] Rent, Utilities, Car, Groceries, Savings, Health, Entertainment, Misc.")
+    print("[3 - Maximal] Rent, Utilities, Car, Groceries, Savings, Health, Entertainment, Debt, Emergency Fund, Misc.")
     category_type = input("Please enter your choice (1-3): ")
 
     #Create dictionaries for each choice
     minimal_categories = {
-        "rent": 0,
-        "utilities": 0,
-        "car": 0,
-        "groceries": 0,
-        "savings": 0,
+        "rent": {},
+        "utilities": {},
+        "car": {},
+        "groceries": {},
+        "savings": {},
+        "misc": {},
     }
     detailed_categories = {
-        "rent": 0,
-        "utilities": 0,
-        "car": 0,
-        "groceries": 0,
-        "savings": 0,
-        "health": 0,
-        "entertainment": 0,
+        "rent": {},
+        "utilities": {},
+        "car": {},
+        "groceries": {},
+        "savings": {},
+        "health": {},
+        "entertainment": {},
+        "misc": {},
     }
     maximal_categories = {
-        "rent": 0,
-        "utilities": 0,
-        "car": 0,
-        "groceries": 0,
-        "savings": 0,
-        "health": 0,
-        "entertainment": 0,
-        "debt": 0,
-        "emergency fund": 0,
+        "rent": {},
+        "utilities": {},
+        "car": {},
+        "groceries": {},
+        "savings": {},
+        "health": {},
+        "entertainment": {},
+        "debt": {},
+        "emergency fund": {},
+        "misc": {},
     }
 
     #Set expenses to chosen category
@@ -150,7 +154,11 @@ def loadBudget():
 
     print("You have chosen to load: ", selection)
     print("<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>\n")
-    return selection
+
+    #Return the budget dictionary
+    with open(os.path.join(budgets_folder, selection), "r") as budget_file:
+        current_budget = json.load(budget_file)
+    return current_budget, selection
 
 def deleteBudget():
     #Grab all budgets
@@ -191,10 +199,10 @@ def deleteBudget():
         print("Deletion cancelled")
 
 #This is where we will actually do budget manipulation
-def management(current_budget):
+def management(current_budget, budget_name):
     while True:
         try:
-            print(current_budget.removesuffix(".json"))
+            print(budget_name.removesuffix(".json"))
             print("Spending: ") #Insert spending / limit here
             print("\nPlease choose an option from the list below (1-5): ")
             print("[1] View Expenses")
@@ -205,9 +213,9 @@ def management(current_budget):
             choice = input("Please enter your choice: ")
             match choice:
                 case "1":
-                    purchases()
+                    expenses()
                 case "2":
-                    add_purchase()
+                    purchase_menu(current_budget)
                 case "3":
                     create_categories()
                 case "4":
@@ -221,11 +229,55 @@ def management(current_budget):
         except ValueError:
             print("Invalid choice")
 
-def purchases():
+def expenses():
     print("Currently in development")
+    #The idea here is we will print
 
-def add_purchase():
-    print("currently in development")
+def purchase_menu(current_budget):
+    print("What category should your purchase be added to?:")
+
+    categories = current_budget["expenses"]
+    #Index the categories, print them with their index
+    for i, category in enumerate(categories.keys()):
+        print(f"[{i+1}] {category.capitalize()}")
+
+    #Category choice (returns index) + error handling
+    try:
+        cat_choice = input("Choose one: ")
+        cat_choice = int(cat_choice) - 1
+        if cat_choice < 0 or cat_choice >= len(categories):
+            raise ValueError("Invalid choice")
+    except ValueError:
+        print("Invalid choice")
+        return
+
+    #Name of item being added + cost
+    purchase = input("Purchase: ")
+    cost = float(input("Cost: "))
+
+    #Whatever category matches the index from before gets ran in add_purchase()
+    for i, category in enumerate(categories.keys()):
+        if cat_choice == i:
+            add_purchase(current_budget, category, purchase, cost)
+
+
+
+
+def add_purchase(current_budget, category, purchase, cost):
+    # Create new dic with purchase in it. Create the filename, open the file at that name, write the new dict in
+
+    #Create the new dictionary entry for the item
+    print("Adding", purchase, "to", category, "with the price", cost)
+    current_budget["expenses"][category][purchase] = cost
+
+    #Create filename w/ the dir, filename and json file extension
+    budgets_folder = "Budgets"
+    filename = os.path.join(budgets_folder, current_budget["budget_name"] + ".json")
+    #Open file with filename
+    with open(filename, "w") as budget_file:
+        json.dump(current_budget, budget_file, indent=4)
+
+
 
 def create_categories():
     print("currently in development")
@@ -241,15 +293,14 @@ def main():
             #Create/Load/Delete
             startProgram()
             #Load current budget for use in management
-            current_budget = loadBudget()
+            current_budget, budget_name = loadBudget()
             #Bulk of budget manipulation done here
-            management(current_budget)
+            management(current_budget, budget_name)
         except:
             print("Something went wrong, please report this to the developer\n")
 
-#Automatically run main
-if __name__ == "__main__":
-    main()
+
+main()
 
 
 
