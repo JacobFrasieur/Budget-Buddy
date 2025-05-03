@@ -1,5 +1,10 @@
 import json
 import os
+import sys
+
+#LIST TO BE ADDED:
+#1. User story requires I add some sort of warning when budget near threshold
+#2. User story requires I show the amount that a user is over budget
 
 def banner():
     print(r""" /$$$$$$$                  /$$                       /$$           /$$$$$$$                  /$$       /$$                """)
@@ -20,24 +25,27 @@ def startProgram():
     while True:
         try:
             print(
-                "Please enter a number to pick an option below:\n[1] New Budget\n[2] Load Budget\n[3] Delete Budget")
-            choice = input("Please enter your choice (1-3): ")
+                "Please enter a number to pick an option below:\n[1] New Budget\n[2] Load Budget\n[3] Delete Budget\n[4] Tutorial\n[5] Close Program")
+            choice = input("Please enter your choice (1-5): ")
             print("\n<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>\n")
             #We keep load separate from the startProgram - we load it after creation anyways
             match choice:
                 case "1":
                     newBudget()
-                    return
+                    return "load"
                 case "2":
                     budgets_folder = "Budgets"
                     if os.path.exists(budgets_folder):
-                        return
+                        return "load"
                     else:
                         raise FileNotFoundError
                 case "3":
                     deleteBudget()
-                    #ADD HANDLING - If no budgets remain, newBudget() must be ran to avoid loading no budgets message
-                    return
+                    continue
+                case "4":
+                    tutorial()
+                case "5":
+                    return "exit"
                 case _:
                     raise ValueError
         except ValueError:
@@ -193,8 +201,8 @@ def deleteBudget():
     print("You have chosen to delete:",selection)
     delete_confirm = input("Do you want to delete this budget? (y/n): ")
     if delete_confirm == "y":
-        os.remove(selection)
-        print(f"'{selection}' has been deleted")
+        os.remove(os.path.join(budgets_folder, selection))
+        print(f"'{selection}' has been deleted\n")
     else:
         print("Deletion cancelled")
 
@@ -205,31 +213,44 @@ def management(current_budget, budget_name):
 
             #Spending total
             categories = current_budget["expenses"]
+            threshold = 0.9
             total_spending = 0
             for category, purchases in current_budget["expenses"].items():
                 for item, cost in purchases.items():
                     total_spending += cost
             print("$",total_spending, "/", "$",current_budget["limit"])
+            if (float(current_budget["limit"]) * threshold) < float(total_spending) < float(current_budget["limit"]):
+                print("Reaching spending limit")
+            if float(total_spending) > float(current_budget["limit"]):
+                print("Over budget by: $", float(total_spending) - float(current_budget["limit"]))
 
             print("\nPlease choose an option from the list below (1-5): ")
             print("[1] View Expenses")
             print("[2] Add Purchase")
             print("[3] Create Categories")
             print("[4] Settings")
-            print("[5] Return to Main Menu") #Find a way to return back to loadbudget
-            choice = input("Please enter your choice: ")
+            print("[5] Back")
+            choice = input("Please enter your choice (1-5): ")
             match choice:
                 case "1":
                     print("\n<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>")
                     expenses(current_budget)
                     print("<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>\n")
                 case "2":
+                    print("\n<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>")
                     purchase_menu(current_budget)
+                    print("<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>\n")
                 case "3":
+                    print("\n<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>")
                     create_categories(current_budget)
+                    print("<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>\n")
                 case "4":
-                    settings()
+                    print("\n<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>")
+                    settings(current_budget)
+                    print("<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>\n")
+                    continue
                 case "5":
+                    print("\n<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>\n")
                     return
                 case _:
                     print("Invalid choice")
@@ -250,26 +271,31 @@ def expenses(current_budget):
     print("Total Spent: $",total_spending)
 
 def purchase_menu(current_budget):
-    print("What category should your purchase be added to?:")
+    while True:
+        print("What category should your purchase be added to?:")
 
-    categories = current_budget["expenses"]
-    #Index the categories, print them with their index
-    for i, category in enumerate(categories.keys()):
-        print(f"[{i+1}] {category.capitalize()}")
+        categories = current_budget["expenses"]
+        #Index the categories, print them with their index
+        for i, category in enumerate(categories.keys()):
+            print(f"[{i+1}] {category.capitalize()}")
 
-    #Category choice (returns index) + error handling
-    try:
-        cat_choice = input("Choose one: ")
-        cat_choice = int(cat_choice) - 1
-        if cat_choice < 0 or cat_choice >= len(categories):
-            raise ValueError("Invalid choice")
-    except ValueError:
-        print("Invalid choice")
-        return
 
-    #Name of item being added + cost
-    purchase = input("Purchase: ")
-    cost = float(input("Cost: "))
+        try:
+            # Category choice (returns index) + error handling
+            cat_choice = input("Choose one: ")
+            cat_choice = int(cat_choice) - 1
+            if cat_choice < 0 or cat_choice >= len(categories):
+                raise ValueError("Invalid choice")
+
+            # Name of item being added & cost
+            purchase = input("Purchase: ")
+            cost = float(input("Cost: "))
+            break
+
+        except ValueError:
+            print("Invalid choice, try again")
+
+
 
     #Whatever category matches the index from before gets ran in add_purchase()
     for i, category in enumerate(categories.keys()):
@@ -302,25 +328,95 @@ def create_categories(current_budget):
     with open(filename, "w") as budget_file:
         json.dump(current_budget, budget_file, indent=4)
 
-def settings():
-    print("currently in development")
-
-#Main - Self explanatory
-def main():
+def settings(current_budget):
     while True:
         try:
-            banner()
-            #Create/Load/Delete
-            startProgram()
-            #Load current budget for use in management
-            current_budget, budget_name = loadBudget()
-            #Bulk of budget manipulation done here
-            management(current_budget, budget_name)
-        except:
-            print("Something went wrong, please report this to the developer\n")
+            print("What would you like to do? (1-4):")
+            print("\n[1] Change budget name")
+            print("[2] Change budget limit")
+            print("[3] Delete budget category")
+            print("[4] Back")
+            settings = input("Please enter your choice: ")
+            match settings:
+                case "1":
+                    #Save old filename
+                    budgets_folder = "Budgets"
+                    old_filename = os.path.join(budgets_folder, current_budget["budget_name"] + ".json")
+                    #Change budgets json name
+                    new_name = input("\nPlease enter new name: ")
+                    current_budget["budget_name"] = new_name
 
+                    # Open file with filename
+                    with open(old_filename, "w") as budget_file:
+                        json.dump(current_budget, budget_file, indent=4)
+
+                    # Create filename w/ the dir, filename and json file extension
+                    filename = os.path.join(budgets_folder, current_budget["budget_name"] + ".json")
+                    #Apply new filename
+                    os.rename(old_filename, filename)
+
+
+
+
+                case "2":
+                    #Change budget limit
+                    new_limit = float(input("\nPlease enter new limit: "))
+                    current_budget["limit"] = new_limit
+
+                    # Create filename w/ the dir, filename and json file extension
+                    budgets_folder = "Budgets"
+                    filename = os.path.join(budgets_folder, current_budget["budget_name"] + ".json")
+                    # Open file with filename
+                    with open(filename, "w") as budget_file:
+                        json.dump(current_budget, budget_file, indent=4)
+
+                case "3":
+                    print("in testing")
+                case "4":
+                    return
+                case _:
+                    raise ValueError
+        except ValueError:
+            print("Invalid choice")
+
+def tutorial():
+    while True:
+        try:
+            info = input("What would you like to know about?:\n[1] How do I create a budget?\n[2] How do I add a purchase?\n[3] How do I add a category?\n[4] Where do I see my purchases?\n[5] How do I change my budget name or limit?\n[6] Exit tutorial\nPlease enter your choice: ")
+            match info:
+                case "1":
+                    print("\nTo create a budget, simply type 1 while in the main menu and fill out the required fields.\n")
+                case "2":
+                    print("\nTo add a purchase, load a budget by typing 2 while in the main menu and then pick a budget. Once you do this, you will now see various options\nfor your budget. Type 2 to add a purchase and fill out the required fields.\n")
+                case "3":
+                    print("\nTo add a new category, load a budget by typing 2 while in the main menu and then pick a budget. Once you do this, you will now see various options\nfor your budget. Type 3 to add a new category and fill out the required fields.\n")
+                case "4":
+                    print("\nTo see your purchases, load a budget by typing 2 while in the main menu and then pick a budget. Once you do this, you will now see various options\nfor your budget. Click 1 to view your expenses.\n")
+                case "5":
+                    print("\nTo change your budget name or limit, first load a budget by typing 2 while in the main menu and then pick a budget. Once you do this, you will now see\n various options for your budget. Type 4 for settings, and choose the relevant option from the menu.\n")
+                case "6":
+                    print("\n<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>\n")
+                    return
+                case _:
+                    raise ValueError
+        except ValueError:
+            print("Invalid choice, try again")
+            return
+#Main - Self explanatory
+def main():
+        banner()
+        #Create/Load/Delete
+        while True:
+            #Changed to return instructions - things broke in a normal while loop
+            instructions = startProgram()
+            if instructions == "load":
+                #Load current budget for use in management
+                current_budget, budget_name = loadBudget()
+                #Bulk of budget manipulation done here
+                management(current_budget, budget_name)
+            elif instructions == "exit":
+                sys.exit()
 
 main()
-
 
 
