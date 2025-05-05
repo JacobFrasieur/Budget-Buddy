@@ -54,15 +54,20 @@ def startProgram():
             print("You don't have any budget to load, please create one first!\n")
 
 def newBudget():
-    #Get information from user
-    print("You have chosen to create a new budget, please fill out the following information:")
-    income = input("Current Income:")
-    limit = input("Please enter your monthly spending limit: ")
-    print("Please choose a set of starting categories for your purchase: ")
-    print("[1 - Minimal] Rent, Utilities, Car, Groceries, Savings, Misc.")
-    print("[2 - Detailed] Rent, Utilities, Car, Groceries, Savings, Health, Entertainment, Misc.")
-    print("[3 - Maximal] Rent, Utilities, Car, Groceries, Savings, Health, Entertainment, Debt, Emergency Fund, Misc.")
-    category_type = input("Please enter your choice (1-3): ")
+    print(" A quick budget will set your budget name, income, and limit to default values.")
+    quick_gen = input("Would you like to generate a quick budget? (Y/N): ")
+    if quick_gen == "y" or quick_gen == "Y":
+        category_type = "2"
+    else:
+        #Get information from user
+        print("You have chosen to create a new budget, please fill out the following information:")
+        income = input("Current Income:")
+        limit = input("Please enter your monthly spending limit: ")
+        print("Please choose a set of starting categories for your purchase: ")
+        print("[1 - Minimal] Rent, Utilities, Car, Groceries, Savings, Misc.")
+        print("[2 - Detailed] Rent, Utilities, Car, Groceries, Savings, Health, Entertainment, Misc.")
+        print("[3 - Maximal] Rent, Utilities, Car, Groceries, Savings, Health, Entertainment, Debt, Emergency Fund, Misc.")
+        category_type = input("Please enter your choice (1-3): ")
 
     #Create dictionaries for each choice
     minimal_categories = {
@@ -108,8 +113,13 @@ def newBudget():
             print("Invalid choice, using minimal categories")
             expenses = minimal_categories
 
-    #Budget name
-    budget_name = input("Please enter your budget's name: ")
+    #Quick budget handling
+    if quick_gen == "Y" or quick_gen == "y":
+        budget_name = "Budget"
+        income = "2000"
+        limit = "2000"
+    else:
+        budget_name = input("Please enter your budget's name: ")
 
     #Create a dictionary of the budget
     current_budget = {
@@ -199,6 +209,7 @@ def deleteBudget():
 
     #Confirm deletion to prevent accidents
     print("You have chosen to delete:",selection)
+    print("Deleting a budget will delete all purchases and categories you have added")
     delete_confirm = input("Do you want to delete this budget? (y/n): ")
     if delete_confirm == "y":
         os.remove(os.path.join(budgets_folder, selection))
@@ -268,7 +279,7 @@ def expenses(current_budget):
         for item, cost in purchases.items():
             print(f"{category.capitalize()}: ${cost} - {item}")
             total_spending += cost
-    print("Total Spent: $",total_spending)
+    print("Total: $",total_spending)
 
 def purchase_menu(current_budget):
     while True:
@@ -334,7 +345,7 @@ def settings(current_budget):
             print("What would you like to do? (1-4):")
             print("\n[1] Change budget name")
             print("[2] Change budget limit")
-            print("[3] Delete budget category")
+            print("[3] Create budget backup")
             print("[4] Back")
             settings = input("Please enter your choice: ")
             match settings:
@@ -371,7 +382,13 @@ def settings(current_budget):
                         json.dump(current_budget, budget_file, indent=4)
 
                 case "3":
-                    print("in testing")
+                    print("Creating backup...")
+                    budgets_folder = "Budgets"
+                    filename = os.path.join(budgets_folder, current_budget["budget_name"] + "_backup" + ".json")
+                    # Open file with filename
+                    with open(filename, "w") as budget_file:
+                        json.dump(current_budget, budget_file, indent=4)
+                    print("Backup created successfully")
                 case "4":
                     return
                 case _:
