@@ -257,7 +257,11 @@ def management(current_budget, budget_name):
                     print("<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>\n")
                 case "4":
                     print("\n<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>")
-                    settings(current_budget)
+                    #Handle rename without budget reload
+                    budget_rename = settings(current_budget)
+                    if budget_rename:
+                        budget_name = budget_rename
+                        continue
                     print("<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>\n")
                     continue
                 case "5":
@@ -366,8 +370,7 @@ def settings(current_budget):
                     #Apply new filename
                     os.rename(old_filename, filename)
 
-
-
+                    return new_name
 
                 case "2":
                     #Change budget limit
