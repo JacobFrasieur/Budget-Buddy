@@ -2,9 +2,6 @@ import json
 import os
 import sys
 
-#LIST TO BE ADDED:
-#1. User story requires I add some sort of warning when budget near threshold
-#2. User story requires I show the amount that a user is over budget
 
 def banner():
     print(r""" /$$$$$$$                  /$$                       /$$           /$$$$$$$                  /$$       /$$                """)
@@ -24,8 +21,24 @@ def banner():
 def startProgram():
     while True:
         try:
+            #Intro message
+            print("Welcome to Budget Buddy! Making your budget is simple, all you have to do is create a new budget,\n"
+                  "fill out your information, and load it! From there, you will have a litany of options on how you can\n"
+                  "utilize your budget. Whether you want to add purchases, view your purchases, or create new purchase"
+                  "categories, its all there!\n")
             print(
-                "Please enter a number to pick an option below:\n[1] New Budget\n[2] Load Budget\n[3] Delete Budget\n[4] Tutorial\n[5] Close Program")
+                #Main menu options
+                "Please enter a number to pick an option below:\n\n"
+                "[1] New Budget\n"
+                "Choose this to set your income, budget amount, starting categories, and name your budget.\n\n"
+                "[2] Load Budget\n"
+                "Choose this to choose from your available budgets.\n\n"
+                "[3] Delete Budget\n"
+                "Choose this to choose a budget to delete.\n\n"
+                "[4] Tutorial\n"
+                "Choose this if you have any questions.\n\n"
+                "[5] Close Program")
+
             choice = input("Please enter your choice (1-5): ")
             print("\n<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>\n")
             #We keep load separate from the startProgram - we load it after creation anyways
@@ -54,7 +67,7 @@ def startProgram():
             print("You don't have any budget to load, please create one first!\n")
 
 def newBudget():
-    print(" A quick budget will set your budget name, income, and limit to default values.")
+    print("A quick budget will set your budget name, income, and limit to default values.")
     quick_gen = input("Would you like to generate a quick budget? (Y/N): ")
     if quick_gen == "y" or quick_gen == "Y":
         category_type = "2"
@@ -230,17 +243,28 @@ def management(current_budget, budget_name):
                 for item, cost in purchases.items():
                     total_spending += cost
             print("$",total_spending, "/", "$",current_budget["limit"])
+
+            #Spending limit & Over budget handling
             if (float(current_budget["limit"]) * threshold) < float(total_spending) < float(current_budget["limit"]):
                 print("Reaching spending limit")
             if float(total_spending) > float(current_budget["limit"]):
                 print("Over budget by: $", float(total_spending) - float(current_budget["limit"]))
 
+            #Menu options
             print("\nPlease choose an option from the list below (1-5): ")
-            print("[1] View Expenses")
-            print("[2] Add Purchase")
-            print("[3] Create Categories")
-            print("[4] Settings")
-            print("[5] Back")
+            print("[1] View Expenses\n"
+                  "Choose this if you want to view all your current purchases.\n")
+            print("[2] Add Purchase\n"
+                  "Choose this if you want to add a purchase, then fill out its name, category, and cost.\n")
+            print("[3] Create Categories\n"
+                  "Click this if you want to add a new purchase category. It will then show up when you\n"
+                  "choose a category while adding a purchase.\n")
+            print("[4] Settings\n"
+                  "Choose this if you want to create a backup of your budget, or change its name and limit\n")
+            print("[5] Back\n"
+                  "Choose this if you want to return to the previous menu.\n")
+
+            #User input match-case
             choice = input("Please enter your choice (1-5): ")
             match choice:
                 case "1":
@@ -303,7 +327,7 @@ def purchase_menu(current_budget):
                 raise ValueError("Invalid choice")
 
             # Name of item being added & cost
-            purchase = input("Purchase: ")
+            purchase = input("Name of purchase: ")
             cost = float(input("Cost: "))
             break
 
@@ -346,11 +370,14 @@ def create_categories(current_budget):
 def settings(current_budget):
     while True:
         try:
+            #User input options for settings
             print("What would you like to do? (1-4):")
             print("\n[1] Change budget name")
             print("[2] Change budget limit")
             print("[3] Create budget backup")
             print("[4] Back")
+
+            #User input + match cases
             settings = input("Please enter your choice: ")
             match settings:
                 case "1":
@@ -402,6 +429,7 @@ def settings(current_budget):
 def tutorial():
     while True:
         try:
+            #Basic print statements with details about the different features of this application
             info = input("What would you like to know about?:\n[1] How do I create a budget?\n[2] How do I add a purchase?\n[3] How do I add a category?\n[4] Where do I see my purchases?\n[5] How do I change my budget name or limit?\n[6] Exit tutorial\nPlease enter your choice: ")
             match info:
                 case "1":
@@ -413,7 +441,7 @@ def tutorial():
                 case "4":
                     print("\nTo see your purchases, load a budget by typing 2 while in the main menu and then pick a budget. Once you do this, you will now see various options\nfor your budget. Click 1 to view your expenses.\n")
                 case "5":
-                    print("\nTo change your budget name or limit, first load a budget by typing 2 while in the main menu and then pick a budget. Once you do this, you will now see\n various options for your budget. Type 4 for settings, and choose the relevant option from the menu.\n")
+                    print("\nYou are able to completely customize your budget. To change your budget name or limit, first load a budget by typing 2 while in the main menu and then pick a budget. Once you do this, you will now see\n various options for your budget. Type 4 for settings, and choose the relevant option from the menu.\n")
                 case "6":
                     print("\n<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>\n")
                     return
