@@ -1,9 +1,9 @@
 import json
-
 import zmq
 import os
 import glob
 
+#Microservice that handles deletion of all budgets
 
 def main():
     context = zmq.Context()

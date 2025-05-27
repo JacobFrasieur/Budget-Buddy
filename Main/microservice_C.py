@@ -2,6 +2,8 @@ import zmq
 import os
 import json
 
+#Microservice that handles memo creation
+
 def main():
     context = zmq.Context()
     socket = context.socket(zmq.REP)

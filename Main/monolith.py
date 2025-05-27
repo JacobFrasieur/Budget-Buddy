@@ -2,7 +2,7 @@ import json
 import os
 import sys
 import time
-
+import random
 import zmq
 
 #Global vars
@@ -248,6 +248,7 @@ def management(current_budget, budget_name):
     while True:
         try:
             print(budget_name.removesuffix(".json"))
+            print(random_memo())
 
             #Spending total
             categories = current_budget["expenses"]
@@ -533,6 +534,20 @@ def microC_connect():
             return
         else:
             print("Communication error")
+
+def random_memo():
+    filename = os.path.join("Memos", "memos.json")
+
+    if not os.path.exists(filename):
+        memo = "No memos found"
+        return memo
+
+    with open(filename, "r") as f:
+        memos = json.load(f)
+
+    rand_memo = random.choice(memos["motivations"])
+
+    return rand_memo
 
 def main():
         banner()
