@@ -191,7 +191,7 @@ def loadBudget():
             print("Invalid choice")
 
     print("You have chosen to load: ", selection)
-    print(buffer)
+    print(f"\n{buffer}")
 
     #Return the budget dictionary
     with open(os.path.join(budgets_folder, selection), "r") as budget_file:
@@ -266,7 +266,7 @@ def management(current_budget, budget_name):
 
             #Menu options
             print("\nPlease choose an option from the list below (1-5): ")
-            print("[1] View Expenses\n"
+            print("\n[1] View Expenses\n"
                   "Choose this if you want to view all your current purchases.\n")
             print("[2] Add Purchase\n"
                   "Choose this if you want to add a purchase, then fill out its name, category, and cost.\n")
@@ -397,7 +397,8 @@ def settings(current_budget):
             print("\n[1] Change budget name")
             print("[2] Change budget limit")
             print("[3] Create budget backup")
-            print("[4] Back")
+            print("[4] Create memo")
+            print("[5] Back")
 
             #User input + match cases
             settings = input("Please enter your choice: ")
@@ -441,7 +442,10 @@ def settings(current_budget):
                     with open(filename, "w") as budget_file:
                         json.dump(current_budget, budget_file, indent=4)
                     print("Backup created successfully")
+
                 case "4":
+                    microC_connect()
+                case "5":
                     return
                 case _:
                     raise ValueError
@@ -512,6 +516,23 @@ def microB_connect():
             print("Deletion cancelled, returning to main menu\n")
             return
 
+def microC_connect():
+    context = zmq.Context()
+    socket = context.socket(zmq.REQ)
+    socket.connect("tcp://localhost:5556")
+
+    socket.send_string("start")
+    time.sleep(0.1)
+    if socket.recv_string() == "confirm":
+        motiv = input("Please enter your motivational message: ")
+        socket.send_string(motiv)
+        time.sleep(0.1)
+        if socket.recv_string() == "done":
+            print("Memo added\n")
+            print(buffer)
+            return
+        else:
+            print("Communication error")
 
 def main():
         banner()

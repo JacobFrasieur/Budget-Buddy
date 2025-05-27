@@ -23,6 +23,7 @@ def main():
             #Store filenames for deletion msg
             deleted_files = []
 
+            #Find and delete all files that match deletethis pattern. Append them to our deleted files list
             for i in glob.glob(deletethis):
                 os.remove(i)
                 file = os.path.basename(i)
@@ -30,4 +31,5 @@ def main():
 
             #Farewell files
             socket.send_string(json.dumps(deleted_files))
+
 main()
