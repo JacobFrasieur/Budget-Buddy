@@ -4,22 +4,25 @@ import sys
 import time
 import random
 import zmq
+import colorama
+from zmq.error import Again
+colorama.init(autoreset=True)
 
 #Global vars
 buffer = "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>\n"
 
 def banner():
-    print(r""" /$$$$$$$                  /$$                       /$$           /$$$$$$$                  /$$       /$$                """)
-    print(r"""| $$__  $$                | $$                      | $$          | $$__  $$                | $$      | $$                """)
-    print(r"""| $$  \ $$ /$$   /$$  /$$$$$$$  /$$$$$$   /$$$$$$  /$$$$$$        | $$  \ $$ /$$   /$$  /$$$$$$$  /$$$$$$$ /$$   /$$      """)
-    print(r"""| $$$$$$$ | $$  | $$ /$$__  $$ /$$__  $$ /$$__  $$|_  $$_/        | $$$$$$$ | $$  | $$ /$$__  $$ /$$__  $$| $$  | $$      """)
-    print(r"""| $$__  $$| $$  | $$| $$  | $$| $$  \ $$| $$$$$$$$  | $$          | $$__  $$| $$  | $$| $$  | $$| $$  | $$| $$  | $$      """)
-    print(r"""| $$  \ $$| $$  | $$| $$  | $$| $$  | $$| $$_____/  | $$ /$$      | $$  \ $$| $$  | $$| $$  | $$| $$  | $$| $$  | $$      """)
-    print(r"""| $$$$$$$/|  $$$$$$/|  $$$$$$$|  $$$$$$$|  $$$$$$$  |  $$$$/      | $$$$$$$/|  $$$$$$/|  $$$$$$$|  $$$$$$$|  $$$$$$$      """)
-    print(r"""|_______/  \______/  \_______/ \____  $$ \_______/   \___/        |_______/  \______/  \_______/ \_______/ \____  $$      """)
-    print(r"""                               /$$  \ $$                                                                   /$$  | $$      """)
-    print(r"""                              |  $$$$$$/                                                                  |  $$$$$$/      """)
-    print(r"""                               \______/                                                                    \______/       """)
+    color(r""" /$$$$$$$                  /$$                       /$$           /$$$$$$$                  /$$       /$$                """, "green")
+    color(r"""| $$__  $$                | $$                      | $$          | $$__  $$                | $$      | $$                """, "green")
+    color(r"""| $$  \ $$ /$$   /$$  /$$$$$$$  /$$$$$$   /$$$$$$  /$$$$$$        | $$  \ $$ /$$   /$$  /$$$$$$$  /$$$$$$$ /$$   /$$      """, "green")
+    color(r"""| $$$$$$$ | $$  | $$ /$$__  $$ /$$__  $$ /$$__  $$|_  $$_/        | $$$$$$$ | $$  | $$ /$$__  $$ /$$__  $$| $$  | $$      """, "green")
+    color(r"""| $$__  $$| $$  | $$| $$  | $$| $$  \ $$| $$$$$$$$  | $$          | $$__  $$| $$  | $$| $$  | $$| $$  | $$| $$  | $$      """, "green")
+    color(r"""| $$  \ $$| $$  | $$| $$  | $$| $$  | $$| $$_____/  | $$ /$$      | $$  \ $$| $$  | $$| $$  | $$| $$  | $$| $$  | $$      """, "green")
+    color(r"""| $$$$$$$/|  $$$$$$/|  $$$$$$$|  $$$$$$$|  $$$$$$$  |  $$$$/      | $$$$$$$/|  $$$$$$/|  $$$$$$$|  $$$$$$$|  $$$$$$$      """, "green")
+    color(r"""|_______/  \______/  \_______/ \____  $$ \_______/   \___/        |_______/  \______/  \_______/ \_______/ \____  $$      """, "green")
+    color(r"""                               /$$  \ $$                                                                   /$$  | $$      """, "green")
+    color(r"""                              |  $$$$$$/                                                                  |  $$$$$$/      """, "green")
+    color(r"""                               \______/                                                                    \______/       """, "green")
     print("\nMake and maintain your budget using Budget Buddy!")
     print(buffer)
 
@@ -534,6 +537,27 @@ def microC_connect():
             return
         else:
             print("Communication error")
+
+def color(print_text, category):
+    try:
+        context = zmq.Context()
+        socket = context.socket(zmq.REQ)
+        socket.connect("tcp://localhost:5557")
+        socket.RCVTIMEO = 1000
+
+        socket.send_string("start")
+
+        if socket.recv_string() == "confirm":
+            socket.send_string(print_text)
+            if socket.recv_string() == "received":
+                socket.send_string(category)
+                #Contains final colored string
+                print (socket.recv_string())
+
+        return print_text
+
+    except Again:
+        return print_text
 
 def random_memo():
     filename = os.path.join("Memos", "memos.json")
