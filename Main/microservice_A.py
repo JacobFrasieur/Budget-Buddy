@@ -22,7 +22,7 @@ def main():
     sock.bind("tcp://*:5554")
     # Raise a zmq.Again exception if no message in 1 second:
     sock.setsockopt(zmq.RCVTIMEO, 1000)
-    print("📡  Listening on tcp://*:5555 … (Ctrl+C to quit)")
+    print("✅  Listening on tcp://*:5554 … (Ctrl+C to quit)")
 
     try:
         while True:

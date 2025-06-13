@@ -24,7 +24,7 @@ def banner():
     color(r"""                              |  $$$$$$/                                                                  |  $$$$$$/      """, "green")
     color(r"""                               \______/                                                                    \______/       """, "green")
     print("\nMake and maintain your budget using Budget Buddy!")
-    print(buffer)
+    color(buffer, "yellow")
 
 def startProgram():
     while True:
@@ -34,7 +34,7 @@ def startProgram():
                   "fill out your information, and load it! From there, you will have a litany of options on how you can\n"
                   "utilize your budget. Whether you want to add purchases, view your purchases, or create new purchase"
                   "categories, its all there!\n")
-            print(buffer)
+            color(buffer, "yellow")
             print(
                 #Main menu options
                 "Please enter a number to pick an option below:\n\n"
@@ -49,7 +49,7 @@ def startProgram():
                 "[5] Close Program")
 
             choice = input("Please enter your choice (1-5): ")
-            print("\n<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>\n")
+            color(buffer, "yellow")
             #We keep load separate from the startProgram - we load it after creation anyways
             match choice:
                 case "1":
@@ -161,7 +161,7 @@ def newBudget():
         json.dump(current_budget, budget_file, indent=4)
 
     print(f"'{budget_name}' has been saved to '{filename}'")
-    print(buffer)
+    color(buffer, "yellow")
 
 def loadBudget():
     #Grab all budgets
@@ -171,7 +171,7 @@ def loadBudget():
     #If no budgets, return
     if not budgets:
         print("No budget file found\n")
-        print(buffer)
+        color(buffer, "yellow")
         return None
 
     #Print all the budget files found
@@ -286,28 +286,28 @@ def management(current_budget, budget_name):
             choice = input("Please enter your choice (1-5): ")
             match choice:
                 case "1":
-                    print(buffer)
+                    color(buffer, "yellow")
                     expenses(current_budget)
-                    print(buffer)
+                    color(buffer, "yellow")
                 case "2":
-                    print(buffer)
+                    color(buffer, "yellow")
                     purchase_menu(current_budget)
-                    print(buffer)
+                    color(buffer, "yellow")
                 case "3":
-                    print(buffer)
+                    color(buffer, "yellow")
                     create_categories(current_budget)
-                    print(buffer)
+                    color(buffer, "yellow")
                 case "4":
-                    print(buffer)
+                    color(buffer, "yellow")
                     #Handle rename without budget reload
                     budget_rename = settings(current_budget)
                     if budget_rename:
                         budget_name = budget_rename
                         continue
-                    print(buffer)
+                    color(buffer, "yellow")
                     continue
                 case "5":
-                    print("\n<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>\n")
+                    color(buffer, "yellow")
                     return
                 case _:
                     print("Invalid choice")
@@ -473,7 +473,7 @@ def tutorial():
                 case "5":
                     print("\nYou are able to completely customize your budget. To change your budget name or limit, first load a budget by typing 2 while in the main menu and then pick a budget. Once you do this, you will now see\n various options for your budget. Type 4 for settings, and choose the relevant option from the menu.\n")
                 case "6":
-                    print("\n<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>\n")
+                    color(buffer, "yellow")
                     return
                 case _:
                     raise ValueError
@@ -514,7 +514,7 @@ def microB_connect():
                 farewell_files = json.loads(farewell_files_json)
                 for i in farewell_files:
                     print(f"Deleted {i}")
-                print(buffer)
+                color(buffer, "yellow")
 
         else:
             print("Deletion cancelled, returning to main menu\n")
@@ -533,7 +533,7 @@ def microC_connect():
         time.sleep(0.1)
         if socket.recv_string() == "done":
             print("Memo added\n")
-            print(buffer)
+            color(buffer, "yellow")
             return
         else:
             print("Communication error")

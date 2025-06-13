@@ -8,6 +8,7 @@ def main():
     context = zmq.Context()
     socket = context.socket(zmq.REP)
     socket.bind("tcp://*:5556")
+    print("✅  Listening on tcp://*:5556 … (Ctrl+C to quit)")
     memos_folder = "Memos"
     filename = os.path.join(memos_folder, "memos.json")
     os.makedirs(memos_folder, exist_ok=True)
@@ -15,9 +16,11 @@ def main():
     while True:
         message = socket.recv_string()
         if message == "start":
+            print("Received start command")
             #Confirm and rec motiv memo from user in main program
             socket.send_string("confirm")
             motiv = socket.recv_string()
+            print("Received memo: " + str(motiv))
 
             #Create file if it does not exist
             if not os.path.exists(filename):
